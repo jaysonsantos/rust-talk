@@ -5,3 +5,7 @@ authors = ["Jayson Reis <santosdosreis@gmail.com>"]
 
 [dependencies]
 iron = "*"
+router = "*"
+serde = "*"
+serde_derive = "*"
+serde_json = "*"
