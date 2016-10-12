@@ -4,9 +4,13 @@ version = "0.1.0"
 authors = ["Jayson Reis <santosdosreis@gmail.com>"]
 
 [dependencies]
+bmemcached = "*"
+
 diesel = "0.8.0"
 diesel_codegen = { version = "0.8.0", features = ["postgres"] }
 dotenv = "0.8.0"
+
+lazy_static = "*"
 
 iron = "*"
 router = "*"
