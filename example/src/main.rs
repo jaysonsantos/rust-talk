@@ -7,30 +7,50 @@ extern crate serde_derive;
 extern crate serde;
 extern crate serde_json;
 
+extern crate dotenv;
+#[macro_use] extern crate diesel_codegen;
+#[macro_use] extern crate diesel;
+
+mod schema;
+mod models;
+
+use std::env;
 use std::string::String;
 
 use iron::prelude::*;
 use iron::status;
 use router::Router;
 
-#[derive(Debug, Serialize, Deserialize)]
-struct User {
-    name: String,
-    age: Option<u8>
+use diesel::prelude::*;
+use diesel::pg::PgConnection;
+use dotenv::dotenv;
+
+use models::User;
+
+fn get_connection() -> PgConnection {
+    dotenv().ok();
+
+    let database_url = env::var("DATABASE_URL")
+        .expect("DATABASE_URL must be set");
+    PgConnection::establish(&database_url)
+        .expect(&format!("Error connecting to {}", database_url))
 }
 
+
 fn list_users() -> String {
-    let u1 = User { name: "user 1".to_string(), age: Some(34u8) };
-    let u2 = User { name: "user 2".to_string(), age: Some(12u8) };
-    let u3 = User { name: "user 3".to_string(), age: None };
-    let users = vec![u1, u2, u3];
-    serde_json::to_string(&users).unwrap_or("[]".to_string())
+    use schema::users::dsl::*;
+    let conn = get_connection();
+    let db_users = users.limit(5).load::<User>(&conn).expect("Error loading users");
+    serde_json::to_string(&db_users).unwrap_or("[]".to_string())
 }
 
 
 fn get_user(user: String) -> String {
-    let u = User { name: user, age: Some(34u8) };
-    serde_json::to_string(&u).unwrap_or("null".to_string())
+    use schema::users::dsl::*;
+    let conn = get_connection();
+    let user_list = users.filter(name.like(&format!("%{}%", user))).limit(1).load::<User>(&conn).expect("Error loading user");
+    let db_user = user_list.iter().nth(0);
+    serde_json::to_string(&db_user).unwrap_or("null".to_string())
 }
 
 fn main() {
@@ -38,7 +58,7 @@ fn main() {
     router.get("/", handler, "index");
     router.get("/:query", handler, "query");
 
-    Iron::new(router).http("localhost:3000").unwrap();
+    Iron::new(router).http("0.0.0.0:3000").unwrap();
 
     fn handler(req: &mut Request) -> IronResult<Response> {
         match req.extensions.get::<Router>().unwrap().find("query") {
