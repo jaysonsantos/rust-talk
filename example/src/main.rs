@@ -13,6 +13,8 @@ extern crate dotenv;
 #[macro_use] extern crate diesel_codegen;
 #[macro_use] extern crate diesel;
 
+extern crate bmemcached;
+
 mod schema;
 mod models;
 
@@ -27,7 +29,16 @@ use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
 
+use bmemcached::MemcachedClient;
+
 use models::User;
+
+lazy_static! {
+    static ref CACHE: MemcachedClient = {
+        dotenv().ok();
+        MemcachedClient::new(vec![&*env::var("MEMCACHED").expect("Memcached configuration not found")], 10).expect("Could not connect to memcached.")
+    };
+}
 
 fn get_db_connection() -> PgConnection {
     dotenv().ok();
@@ -38,23 +49,34 @@ fn get_db_connection() -> PgConnection {
         .expect(&format!("Error connecting to {}", database_url))
 }
 
-fn get_memcached_connection()
-
-
 fn list_users() -> String {
     use schema::users::dsl::*;
+    let cached_users: Result<String, _> = CACHE.get("users");
+    match cached_users {
+        Ok(json) => return json,
+        Err(_) => {}
+    }
     let conn = get_db_connection();
     let db_users = users.limit(5).load::<User>(&conn).expect("Error loading users");
-    serde_json::to_string(&db_users).unwrap_or("[]".to_string())
+    let json = serde_json::to_string(&db_users).unwrap_or("[]".to_string());
+    CACHE.set("users", &json, 50000).unwrap();
+    json
 }
-
 
 fn get_user(user: String) -> String {
     use schema::users::dsl::*;
+    let cache_key = format!("get_user_{}", user);
+    let cached_user: Result<String, _> = CACHE.get(&cache_key);
+    match cached_user {
+        Ok(json) => return json,
+        Err(_) => {}
+    }
     let conn = get_db_connection();
     let user_list = users.filter(name.like(&format!("%{}%", user))).limit(1).load::<User>(&conn).expect("Error loading user");
     let db_user = user_list.iter().nth(0);
-    serde_json::to_string(&db_user).unwrap_or("null".to_string())
+    let json = serde_json::to_string(&db_user).unwrap_or("null".to_string());
+    CACHE.set(&cache_key, &json, 50000).unwrap();
+    json
 }
 
 fn main() {

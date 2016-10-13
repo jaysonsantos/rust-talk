@@ -2,6 +2,7 @@
 set -x
 docker build -t rust-talk .
 docker run --name rust-postgres -d postgres
+docker run --name rust-memcached -d memcached
 if [ -n "$(which cygpath)" ]; then
     current_dir="$(cygpath -w $PWD)"
 else
@@ -14,4 +15,6 @@ docker stop rust-talk
 docker rm rust-talk
 docker stop rust-postgres
 docker rm rust-postgres
+docker stop rust-memcached
+docker rm rust-memcached
 read
