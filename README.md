@@ -288,5 +288,20 @@ on nightly you can activate `?` to make it shorter like `function()?`
 
 ---
 # Demo time!
+Initialize the project:
+- `curl https://sh.rustup.rs -sSf | sh -s` this will install rust up, something like pyenv.
+- `rustup update nightly`
+- `cargo new --bin example`
+- `cd example`
+- `rustup override add nightly`
+- `cargo run`
+
+#### Setting up the database
+```bash
+cargo install diesel_cli
+echo DATABASE_URL=postgres://username:password@localhost/diesel_demo > .env
+diesel setup
+diesel migration generate create_users
+```
 ---
 # Thank you
