@@ -296,6 +296,8 @@ Initialize the project:
 - `rustup override add nightly`
 - `cargo run`
 
+---
+
 #### Setting up the database
 ```bash
 cargo install diesel_cli
