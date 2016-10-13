@@ -17,7 +17,7 @@ I am not a pro in rust and I suck explaining stuff and I don't know much about c
 # History
 - Created in 2006 by a Mozilla employee in his spare time.
 - In 2009 Mozilla started sponsoring it.
-- Original compiler was written in OCam and it got rewritten in rust and was able to compile itself in 2011 and uses llvm as backend.
+- Original compiler was written in OCaml and it got rewritten in rust and was able to compile itself in 2011 and uses llvm as backend.
 - First stable version was released in 2015.
 - Mozilla uses it to develop servo, a browser engine.
 
@@ -40,7 +40,7 @@ Hello world!
 - Memory safe, no leaks and it does not use a GC.
 - Abstraction without cost.
 - Easy to understand after you fight with the error system.
-- It uses pattern matching instead of throwing execptions or returning a parameter with error and the other one with the value.
+- It uses pattern matching instead of throwing exceptions or returning a parameter with error and the other with the value.
 
 ---
 
@@ -73,7 +73,7 @@ fn main() {
         _ => {}
     }
     match c.baz {
-        unkown => println!("Unknown match {:?}", unkown)
+        unknown => println!("Unknown match {:?}", unknown)
     }
 }
 ```
@@ -282,7 +282,7 @@ on nightly you can activate `?` to make it shorter like `function()?`
 
 ---
 #### Other stuff
-- A function that can fail, returns a `Result` which can contain `Some(value)`or `Err(err)` and instead of returning tuples (like in go) and checking if error is not null, you just use the `try!` macro, `unwrap` or the other functions like `map`, `expect_or` and etc...
+- A function that can fail, returns a `Result` which can contain `Ok(value)`or `Err(err)` and instead of returning tuples (like in go) and checking if error is not null, you just use the `try!` macro, `unwrap` or the other functions like `map`, `expect_or` and etc...
 - There is no concept of `null`, you have `Option` that can have `Some(value)` or `None` and these values must e unpacked some way before doing some stuff like `function().non_existant_field`, you would have to do at least `function()?.field` and it would break the current function if None was returned.
 - Generics and traits, but too big to talk here.
 
