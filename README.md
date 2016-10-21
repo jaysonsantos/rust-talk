@@ -5,12 +5,12 @@ page_number: true
 -->
 
 # Rust Intro
-Jayon Reis
+Jayson Reis
 
 ---
 
 # Disclaimer
-I am not a pro in rust and I suck explaining stuff and I don't know much about compilers and stuff. It is my general impression.
+I am not a pro in rust and I suck explaining stuff and I don't know much about compilers and etc. It is my general impression.
 
 ---
 
@@ -39,8 +39,8 @@ Hello world!
 - Fast as C and flexible as C++.
 - Memory safe, no leaks and it does not use a GC.
 - Abstraction without cost.
-- Easy to understand after you fight with the error system.
-- It uses pattern matching instead of throwing exceptions or returning a parameter with error and the other with the value.
+- Easy to understand after you fight with the error system and the borrowing.
+- It uses pattern matching to deal with results and optionals instead of throwing exceptions or returning a parameter with error and the other with the value.
 
 ---
 
@@ -91,16 +91,17 @@ What will happen here?
 #[derive(Debug)]
 struct Foo;
 
-fn borrow(a: Foo) {
-    println!("Borrowed {:?}", a);
+fn test(a: Foo) {
+    println!("Data {:?}", a);
 }
 
 fn main() {
     let a = Foo {};
-    borrow(a);
+    test(a);
     println!("{:?}", a);
 }
 ```
+it will move the ownership of a to the called function.
 
 ---
 
@@ -108,7 +109,7 @@ fn main() {
 error: use of moved value: `a` [--explain E0382]
   --> <anon>:11:22
    |>
-10 |>     borrow(a);
+10 |>     test(a);
    |>            - value moved here
 11 |>     println!("{:?}", a);
    |>                      ^ value used here after move
@@ -131,18 +132,18 @@ error: aborting due to previous error
 #[derive(Debug)]
 struct Foo;
 
-fn borrow(a: &Foo) {
-    println!("Borrowed {:?}", a);
+fn test(a: &Foo) {
+    println!("Data {:?}", a);
 }
 
 fn main() {
     let a = Foo {};
-    borrow(&a);
+    test(&a);
     println!("{:?}", a);
 }
 ```
 ```text
-Borrowed Foo
+Data Foo
 Foo
 ```
 ---
@@ -151,14 +152,14 @@ Foo
 #[derive(Debug)]
 struct Foo;
 
-fn borrow(a: Foo) -> Foo {
-    println!("Borrowed {:?}", a);
+fn test(a: Foo) -> Foo {
+    println!("Data {:?}", a);
     a
 }
 
 fn main() {
     let mut a = Foo {};
-    a = borrow(a);
+    a = test(a);
     println!("{:?}", a);
 }
 ```
@@ -273,7 +274,7 @@ There are none!
 You use macros like `let value = try!(function())` which would translate for something like:
 ```rust
 let value = match function() {
-    Some(value) => value,
+    Ok(value) => value,
     Err(err) => return Err(err)
 }
 println!("Value is: {:?}", value);
@@ -282,7 +283,7 @@ on nightly you can activate `?` to make it shorter like `function()?`
 
 ---
 #### Other stuff
-- A function that can fail, returns a `Result` which can contain `Ok(value)`or `Err(err)` and instead of returning tuples (like in go) and checking if error is not null, you just use the `try!` macro, `unwrap` or the other functions like `map`, `expect_or` and etc...
+- A function that can fail, returns a `Result` which can contain `Ok(value)`or `Err(err)` and instead of returning tuples (like in go) and checking if error is not null, you just use the `try!` macro, `unwrap` or the other functions like `map`, `expect` and etc...
 - There is no concept of `null`, you have `Option` that can have `Some(value)` or `None` and these values must e unpacked some way before doing some stuff like `function().non_existant_field`, you would have to do at least `function()?.field` and it would break the current function if None was returned.
 - Generics and traits, but too big to talk here.
 
